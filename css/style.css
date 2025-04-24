@@ -136,3 +136,52 @@ canvas {
 .day-night-controls strong {
     color: #ffcc00;
 }
+
+.continue-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  z-index: 100;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.continue-dialog p {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.continue-dialog button {
+  padding: 10px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#continue-yes {
+  background-color: #4CAF50;
+  color: white;
+}
+
+#continue-no {
+  background-color: #f44336;
+  color: white;
+}
+
+.continue-dialog button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}

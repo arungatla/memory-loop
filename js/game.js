@@ -12,6 +12,11 @@ class Game {
     this.loadingManager = new THREE.LoadingManager();
     this.dayNightControlsAdded = false;
 
+    // Loop system variables
+    this.currentLoop = 1;
+    this.maxLoops = 5;
+    this.loopMemories = []; // Store memories from previous loops
+
     // Setup loading manager
     this.setupLoadingManager();
 
@@ -204,42 +209,199 @@ class Game {
     messageElement.className = "flower-collected-message";
     messageElement.style.fontSize = "36px";
     messageElement.style.padding = "20px 40px";
-    messageElement.textContent = "All Flowers Collected! You Win!";
-    document.getElementById("game-container").appendChild(messageElement);
 
-    // Show and fade out message after a longer time
-    messageElement.style.opacity = "1";
+    if (this.currentLoop < this.maxLoops) {
+      messageElement.textContent = `Loop ${this.currentLoop} Complete!`;
 
-    setTimeout(() => {
-      messageElement.style.opacity = "0";
+      // Create a dialog for continuing
+      const continueDialog = document.createElement("div");
+      continueDialog.className = "continue-dialog";
+      continueDialog.innerHTML = `
+        <p>Continue to iterate?</p>
+        <div class="button-container">
+          <button id="continue-yes">Yes</button>
+          <button id="continue-no">No</button>
+        </div>
+      `;
+      document.getElementById("game-container").appendChild(continueDialog);
 
-      // Reset game after a delay
+      // Add event listeners for buttons
+      document.getElementById("continue-yes").addEventListener("click", () => {
+        continueDialog.remove();
+
+        // Save a memory from this loop
+        this.saveLoopMemory();
+
+        // Advance to next loop
+        this.currentLoop++;
+        this.startNextLoop();
+
+        // Remove the win message
+        messageElement.style.opacity = "0";
+        setTimeout(() => messageElement.remove(), 1000);
+      });
+
+      document.getElementById("continue-no").addEventListener("click", () => {
+        continueDialog.remove();
+        this.showFinalMessage();
+
+        // Remove the win message
+        messageElement.style.opacity = "0";
+        setTimeout(() => messageElement.remove(), 1000);
+      });
+    } else {
+      messageElement.textContent =
+        "All Loops Complete! You've Mastered the Memory Loop!";
+
+      // For the final loop, show the final message after a delay
       setTimeout(() => {
-        messageElement.remove();
-        location.reload(); // Simple way to restart the game
-      }, 1000);
-    }, 5000);
-  }
-
-  showMessage(text, duration = 3000) {
-    // Create or reuse message element
-    let messageElement = document.querySelector(".game-message");
-    if (!messageElement) {
-      messageElement = document.createElement("div");
-      messageElement.className = "game-message";
-      document.getElementById("game-container").appendChild(messageElement);
+        messageElement.style.opacity = "0";
+        setTimeout(() => {
+          messageElement.remove();
+          this.showFinalMessage();
+        }, 1000);
+      }, 3000);
     }
 
-    // Set message text
-    messageElement.textContent = text;
+    document.getElementById("game-container").appendChild(messageElement);
 
     // Show message
     messageElement.style.opacity = "1";
+  }
 
-    // Hide message after duration
+  saveLoopMemory() {
+    // Save some aspect of the current play session as a "memory"
+    const memory = {
+      loop: this.currentLoop,
+      playerPosition: this.player.getPosition().clone(),
+      timeOfDay: this.world.timeOfDay,
+      flowersCollected: this.flowers.getCollectedFlowerCount(),
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    this.loopMemories.push(memory);
+    console.log("Memory saved:", memory);
+  }
+
+  startNextLoop() {
+    // Increase difficulty
+    this.increaseDifficulty();
+
+    // Reset game state for new loop
+    this.reset();
+
+    // Display memories from previous loops
+    this.showLoopMemories();
+
+    // Update loop counter in UI
+    this.updateLoopCounter();
+
+    // Show message about the new loop
+    this.showMessage(
+      `Loop ${this.currentLoop} started. Difficulty increased!`,
+      4000
+    );
+  }
+
+  increaseDifficulty() {
+    // Make each loop more challenging
+
+    // 1. Speed up day/night cycle with each loop
+    const newCycleDuration = Math.max(20, this.world.cycleDuration - 10);
+    this.world.cycleDuration = newCycleDuration;
+
+    // 2. Add more flowers to collect with each loop
+    const additionalFlowers = this.currentLoop * 2;
+    this.flowers.addFlowers(additionalFlowers);
+
+    // 3. Make terrain more extreme with each loop
+    this.world.increaseTerrain(this.currentLoop * 0.2);
+
+    // 4. Add environmental challenge based on loop number
+    switch (this.currentLoop) {
+      case 2:
+        this.world.addFog(0.001 * this.currentLoop);
+        break;
+      case 3:
+        this.world.activateWeatherSystem();
+        break;
+      case 4:
+        this.world.accelerateTimeFlow(1.5);
+        break;
+      case 5:
+        this.world.addMysteriousElements();
+        break;
+    }
+  }
+
+  showLoopMemories() {
+    // Only show memories after the first loop
+    if (this.currentLoop <= 1) return;
+
+    // Create memories UI
+    const memoriesContainer = document.createElement("div");
+    memoriesContainer.className = "memories-container";
+    memoriesContainer.innerHTML = `<h3>Memories from Previous Loops</h3>`;
+
+    // Add each memory
+    this.loopMemories.forEach((memory) => {
+      const memoryElement = document.createElement("div");
+      memoryElement.className = "memory-item";
+      memoryElement.textContent = `Loop ${memory.loop}: Collected ${memory.flowersCollected} flowers at ${memory.timestamp}`;
+      memoriesContainer.appendChild(memoryElement);
+    });
+
+    document.getElementById("game-container").appendChild(memoriesContainer);
+
+    // Fade in
+    memoriesContainer.style.opacity = "1";
+
+    // Fade out after a delay
     setTimeout(() => {
-      messageElement.style.opacity = "0";
-    }, duration);
+      memoriesContainer.style.opacity = "0";
+      setTimeout(() => memoriesContainer.remove(), 1000);
+    }, 5000);
+  }
+
+  updateLoopCounter() {
+    // Create or update loop counter in UI
+    let loopCounter = document.getElementById("loop-counter");
+
+    if (!loopCounter) {
+      loopCounter = document.createElement("div");
+      loopCounter.id = "loop-counter";
+      loopCounter.className = "game-ui";
+      document.getElementById("game-container").appendChild(loopCounter);
+    }
+
+    loopCounter.textContent = `LOOP: ${this.currentLoop}/${this.maxLoops}`;
+  }
+
+  showFinalMessage() {
+    const finalScreen = document.createElement("div");
+    finalScreen.className = "final-screen";
+    finalScreen.innerHTML = `
+      <h1>Memory Loop Complete</h1>
+      <p>You've successfully navigated all ${this.maxLoops} memory loops!</p>
+      <h2>Your Journey:</h2>
+      <ul id="memories-list"></ul>
+      <button id="restart-game">Start New Journey</button>
+    `;
+
+    document.getElementById("game-container").appendChild(finalScreen);
+
+    // Add memories to the list
+    const memoriesList = document.getElementById("memories-list");
+    this.loopMemories.forEach((memory) => {
+      const listItem = document.createElement("li");
+      listItem.textContent = `Loop ${memory.loop}: Collected ${memory.flowersCollected} flowers at ${memory.timestamp}`;
+      memoriesList.appendChild(listItem);
+    });
+
+    // Add restart functionality
+    document.getElementById("restart-game").addEventListener("click", () => {
+      location.reload();
+    });
   }
 }
 

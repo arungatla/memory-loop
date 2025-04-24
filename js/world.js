@@ -143,14 +143,14 @@ class World {
         // Underwater - darker blue/green
         color.setRGB(0.1, 0.2 + slope * 0.2, 0.5);
       } else if (height < 1) {
-        // Shore area - sandy green
-        color.setRGB(0.4, 0.55, 0.3);
+        // Shore area - light forest green
+        color.setRGB(0.4, 0.8, 0.4);  // Lighter forest green for shore
       } else if (height < 5) {
-        // Low ground - deeper forest green
-        color.setRGB(0.15 + slope * 0.05, 0.35 - slope * 0.05, 0.1);
+        // Low ground - light forest green
+        color.setRGB(0.45, 0.75, 0.4);  // Lighter forest green for ground
       } else if (height < 12) {
-        // Hills - mix of forest green and darker green
-        color.setRGB(0.2 + slope * 0.1, 0.3 - slope * 0.05, 0.1);
+        // Hills - mix of light forest green and darker green
+        color.setRGB(0.4 + slope * 0.1, 0.7 - slope * 0.05, 0.35);  // Lighter forest green for hills
       } else {
         // Mountain - rocky gray with green to white peaks
         const snowAmount = Math.max(0, Math.min(1, (height - 15) / 10));
