@@ -24,7 +24,7 @@ class Player {
     this.mouseSensitivity = 0.003;
     this.cameraRotationY = 0; // Horizontal camera rotation
     this.isCameraControlEnabled = false; // Will be enabled on game start
-    
+
     // Flashlight for night
     this.hasFlashlight = true;
     this.flashlightActive = false;
@@ -32,7 +32,7 @@ class Player {
 
     // Create player character
     this.createPlayerCharacter();
-    
+
     // Create flashlight
     this.createFlashlight();
 
@@ -40,7 +40,7 @@ class Player {
     this.setupCameraAndControls();
 
     // Initial position
-    this.playerModel.position.y = 10; // Start higher to see the terrain
+    this.playerModel.position.y = 2; // Start closer to the ground
     this.updateCameraPosition();
   }
 
@@ -59,7 +59,7 @@ class Player {
       metalness: 0.2,
     });
     this.body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    this.body.position.y = 0.9;
+    this.body.position.y = 0.7; // Lower body position to better align with legs
     this.playerModel.add(this.body);
 
     // Head
@@ -70,7 +70,7 @@ class Player {
       metalness: 0.1,
     });
     this.head = new THREE.Mesh(headGeometry, headMaterial);
-    this.head.position.y = 1.7;
+    this.head.position.y = 1.5; // Lower head position to match lowered body
     this.playerModel.add(this.head);
 
     // Eyes
@@ -78,11 +78,11 @@ class Player {
     const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
     this.leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    this.leftEye.position.set(0.15, 1.75, 0.3);
+    this.leftEye.position.set(0.15, 1.55, 0.3); // Adjust eye position to match head
     this.playerModel.add(this.leftEye);
 
     this.rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    this.rightEye.position.set(-0.15, 1.75, 0.3);
+    this.rightEye.position.set(-0.15, 1.55, 0.3); // Adjust eye position to match head
     this.playerModel.add(this.rightEye);
 
     // Arms
@@ -94,12 +94,12 @@ class Player {
     });
 
     this.leftArm = new THREE.Mesh(armGeometry, armMaterial);
-    this.leftArm.position.set(0.7, 1.0, 0);
+    this.leftArm.position.set(0.7, 0.8, 0); // Lower arm position to match body
     this.leftArm.rotation.z = Math.PI / 4;
     this.playerModel.add(this.leftArm);
 
     this.rightArm = new THREE.Mesh(armGeometry, armMaterial);
-    this.rightArm.position.set(-0.7, 1.0, 0);
+    this.rightArm.position.set(-0.7, 0.8, 0); // Lower arm position to match body
     this.rightArm.rotation.z = -Math.PI / 4;
     this.playerModel.add(this.rightArm);
 
@@ -112,11 +112,11 @@ class Player {
     });
 
     this.leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-    this.leftLeg.position.set(0.2, 0.2, 0);
+    this.leftLeg.position.set(0.2, 0.2, 0); // Lower leg position to touch the ground
     this.playerModel.add(this.leftLeg);
 
     this.rightLeg = new THREE.Mesh(legGeometry, legMaterial);
-    this.rightLeg.position.set(-0.2, 0.2, 0);
+    this.rightLeg.position.set(-0.2, 0.2, 0); // Lower leg position to touch the ground
     this.playerModel.add(this.rightLeg);
 
     // Cast shadows for all player parts
@@ -142,26 +142,33 @@ class Player {
 
   createFlashlight() {
     // Create a spotlight that follows the player (flashlight)
-    this.flashlight = new THREE.SpotLight(0xffffff, 1.5, 30, Math.PI / 6, 0.5, 1);
+    this.flashlight = new THREE.SpotLight(
+      0xffffff,
+      1.5,
+      30,
+      Math.PI / 6,
+      0.5,
+      1
+    );
     this.flashlight.position.set(0, 1.5, 0);
     this.flashlight.castShadow = true;
-    
+
     // Configure flashlight shadows
     this.flashlight.shadow.mapSize.width = 1024;
     this.flashlight.shadow.mapSize.height = 1024;
     this.flashlight.shadow.camera.near = 1;
     this.flashlight.shadow.camera.far = 30;
-    
+
     // Create a target for the spotlight to aim at
     this.flashlightTarget = new THREE.Object3D();
     this.flashlightTarget.position.set(0, 0, -5);
     this.scene.add(this.flashlightTarget);
     this.flashlight.target = this.flashlightTarget;
-    
+
     // Initially add the flashlight to the scene but disable it
     this.scene.add(this.flashlight);
     this.flashlight.visible = false;
-    
+
     // Flashlight helper for debugging (uncomment if needed)
     // const flashlightHelper = new THREE.SpotLightHelper(this.flashlight);
     // this.scene.add(flashlightHelper);
@@ -249,9 +256,15 @@ class Player {
           this.flashlight.visible = this.flashlightActive;
         }
         break;
-      case "KeyL": // Toggle day/night (handled in Game class)
+      case "KeyL": // Toggle day/night
+        if (game && game.world) {
+          game.world.toggleDayNight();
+        }
         break;
-      case "KeyK": // Toggle day/night cycle (handled in Game class)
+      case "KeyK": // Toggle day/night cycle
+        if (game && game.world) {
+          game.world.toggleDayNightCycle();
+        }
         break;
     }
   }
@@ -374,9 +387,12 @@ class Player {
           this.playerModel.position.z
         )
       : 0;
-    if (this.playerModel.position.y < groundLevel + 0.9) {
-      // 0.9 is half of character height
-      this.playerModel.position.y = groundLevel + 0.9;
+
+    // Calculate the correct ground position based on character's feet
+    const characterFootHeight = 0.2; // Height from the bottom of the character to the ground
+    if (this.playerModel.position.y < groundLevel + characterFootHeight) {
+      // Position the character so the feet are exactly on the ground
+      this.playerModel.position.y = groundLevel + characterFootHeight;
       this.velocity.y = 0;
       this.canJump = true;
     }
@@ -395,16 +411,28 @@ class Player {
     // Update shadow position
     this.shadow.position.set(
       this.playerModel.position.x,
-      groundLevel + 0.01,
+      groundLevel + 0.005, // Keep shadow closer to ground but still prevent z-fighting
       this.playerModel.position.z
     );
-    
+    // Update shadow scale based on player height and position
+    const distanceFromGround = this.playerModel.position.y - groundLevel;
+    const shadowScale = Math.max(
+      0.4,
+      0.5 + this.height * 0.15 - distanceFromGround * 0.1
+    ); // Scale shadow based on character height and distance from ground
+    this.shadow.scale.set(shadowScale, shadowScale, 1);
+    // Update shadow opacity based on distance from ground
+    this.shadow.material.opacity = Math.min(
+      0.5,
+      0.6 - distanceFromGround * 0.05
+    );
+
     // Update flashlight position and direction
     if (this.flashlight) {
       // Position flashlight at player's head
       this.flashlight.position.copy(this.playerModel.position);
       this.flashlight.position.y += 1.6; // Head height
-      
+
       // Point flashlight in the direction the player is facing
       const lookDirection = new THREE.Vector3(0, 0, -5).applyAxisAngle(
         new THREE.Vector3(0, 1, 0),

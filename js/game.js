@@ -159,10 +159,14 @@ class Game {
     // Reset player position to a higher spot above the terrain to better see it
     const centerX = 0;
     const centerZ = 0;
-    const height = this.world.getHeightAt(centerX, centerZ) + 10; // Start higher up
+    const groundHeight = this.world.getHeightAt(centerX, centerZ);
+    const height = groundHeight + 10; // Start higher up
 
     this.player.playerModel.position.set(centerX, height, centerZ);
     this.player.velocity.set(0, 0, 0);
+
+    // Update shadow position to match the new player position
+    this.player.shadow.position.set(centerX, groundHeight + 0.01, centerZ);
 
     // Reset score
     document.getElementById("score").textContent = "0";

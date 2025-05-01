@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Odyssey - 3D Open World Adventure</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="loading-screen">
+            <div class="loading-content">
+                <h1>Eternal Odyssey</h1>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p class="loading-text">Loading world...</p>
+            </div>
+        </div>
+
+        <div id="game-ui">
+            <div id="health-bar">
+                <div class="health-fill"></div>
+            </div>
+            <div id="inventory-button">Inventory</div>
+            <div id="quest-log-button">Quests</div>
+            <div id="mini-map"></div>
+        </div>
+
+        <div id="game-menu">
+            <h2>Eternal Odyssey</h2>
+            <button id="start-game">Start Game</button>
+            <button id="options">Options</button>
+            <button id="credits">Credits</button>
+        </div>
+
+        <div id="dialog-box" class="hidden">
+            <div class="dialog-content">
+                <p class="character-name"></p>
+                <p class="dialog-text"></p>
+                <button class="dialog-next">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Additional Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/stats.min.js"></script>
+
+    <!-- Ensure THREE.js is loaded before proceeding -->
+    <script>
+        // Check if THREE.js is loaded properly
+        if (typeof THREE === 'undefined') {
+            console.error('THREE.js failed to load');
+            document.addEventListener('DOMContentLoaded', function () {
+                alert('Error: THREE.js library failed to load. Please check your internet connection and try again.');
+            });
+        } else {
+            console.log('THREE.js loaded successfully');
+        }
+    </script>
+
+    <!-- Custom Geometry Implementation -->
+    <script src="js/utils/CustomCapsuleGeometry.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/world.js"></script>
+    <script src="./js/character.js"></script>
+    <script src="./js/controls.js"></script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/story.js"></script>
+    <script src="./js/game.js"></script>
+</body>
+
+</html>

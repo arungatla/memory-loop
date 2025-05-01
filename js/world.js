@@ -24,7 +24,7 @@ class World {
 
     // Night stars
     this.stars = null;
-    
+
     // Day/night cycle properties
     this.isNightTime = false;
     this.autoCycleActive = false;
@@ -32,7 +32,7 @@ class World {
     this.timeOfDay = 0; // 0 = full day, 1 = full night
     this.lastCycleUpdate = Date.now();
     this.currentWorld = "main"; // Track current world for portal system
-    
+
     // NPC system
     this.npcs = [];
     this.animals = [];
@@ -138,19 +138,19 @@ class World {
         slope = Math.abs(nextY - y);
       }
 
-      // Set color based on height and slope - forest green variations
+      // Set color based on height and slope - more natural green variations
       if (height < -1) {
         // Underwater - darker blue/green
         color.setRGB(0.1, 0.2 + slope * 0.2, 0.5);
       } else if (height < 1) {
-        // Shore area - light forest green
-        color.setRGB(0.4, 0.8, 0.4);  // Lighter forest green for shore
+        // Shore area - rich green
+        color.setRGB(0.2, 0.6, 0.2); // Richer green for shore
       } else if (height < 5) {
-        // Low ground - light forest green
-        color.setRGB(0.45, 0.75, 0.4);  // Lighter forest green for ground
+        // Low ground - vibrant grass green
+        color.setRGB(0.15, 0.55, 0.15); // More natural grass green for ground
       } else if (height < 12) {
-        // Hills - mix of light forest green and darker green
-        color.setRGB(0.4 + slope * 0.1, 0.7 - slope * 0.05, 0.35);  // Lighter forest green for hills
+        // Hills - mix of green variations
+        color.setRGB(0.2 + slope * 0.1, 0.5 - slope * 0.05, 0.2); // Natural green for hills
       } else {
         // Mountain - rocky gray with green to white peaks
         const snowAmount = Math.max(0, Math.min(1, (height - 15) / 10));
@@ -334,7 +334,7 @@ class World {
     // Create a custom day sky (gradient blue)
     const daySkyMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        topColor: { value: new THREE.Color(0x0077ff) },  // Bright blue at top
+        topColor: { value: new THREE.Color(0x0077ff) }, // Bright blue at top
         bottomColor: { value: new THREE.Color(0xffffff) }, // White at horizon
       },
       vertexShader: `
@@ -354,13 +354,13 @@ class World {
           gl_FragColor = vec4(mix(bottomColor, topColor, max(h, 0.0)), 1.0);
         }
       `,
-      side: THREE.BackSide
+      side: THREE.BackSide,
     });
 
     // Create a custom night sky (dark blue with stars)
     const nightSkyMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        topColor: { value: new THREE.Color(0x000010) },  // Very dark blue
+        topColor: { value: new THREE.Color(0x000010) }, // Very dark blue
         bottomColor: { value: new THREE.Color(0x0a1025) }, // Slightly lighter at horizon
       },
       vertexShader: `
@@ -380,7 +380,7 @@ class World {
           gl_FragColor = vec4(mix(bottomColor, topColor, max(h, 0.0)), 1.0);
         }
       `,
-      side: THREE.BackSide
+      side: THREE.BackSide,
     });
 
     // Create day skybox with custom material
@@ -802,14 +802,14 @@ class World {
       // Toggle lights with more dramatic changes
       this.sunLight.visible = timeOfDay < 0.5;
       this.sunLight.intensity = 1.5 - timeOfDay * 1.5; // Fade out sun more dramatically
-      
+
       this.moonLight.visible = true; // Always have some moonlight
       this.moonLight.intensity = timeOfDay * 0.6; // Stronger moonlight at night
 
       // Make ambient light changes more dramatic
       const ambientIntensity = 0.7 - timeOfDay * 0.6; // Much darker at night
       this.ambientLight.intensity = ambientIntensity;
-      
+
       // Change ambient light color for day/night
       if (timeOfDay < 0.5) {
         // Daytime - warm light
@@ -820,7 +820,7 @@ class World {
       }
 
       // Adjust hemisphere light more dramatically
-      const hemiIntensity = 0.5 - timeOfDay * 0.4; 
+      const hemiIntensity = 0.5 - timeOfDay * 0.4;
       this.hemisphereLight.intensity = hemiIntensity;
 
       // Show/hide moon and stars with more opacity
@@ -841,13 +841,13 @@ class World {
       if (this.terrainMaterial) {
         // Adjust terrain color based on time
         if (timeOfDay < 0.5) {
-          // Daytime colors - vibrant
-          this.terrainMaterial.color = new THREE.Color(0x2a6b30); // Forest green
+          // Daytime colors - vibrant natural green
+          this.terrainMaterial.color = new THREE.Color(0x1e5c1e); // Natural grass green
         } else {
           // Nighttime colors - muted
           this.terrainMaterial.color = new THREE.Color(0x0e2712); // Dark forest
         }
-        
+
         this.terrainMaterial.roughness = 0.8 - timeOfDay * 0.3;
         this.terrainMaterial.envMapIntensity = timeOfDay < 0.5 ? 1.0 : 0.3;
       }
@@ -892,13 +892,13 @@ class World {
       const now = Date.now();
       const elapsed = (now - this.lastCycleUpdate) / 1000; // seconds
       this.lastCycleUpdate = now;
-      
+
       // Update time of day
       this.timeOfDay = (this.timeOfDay + elapsed / this.cycleDuration) % 1.0;
-      
+
       // Apply the current time of day
       this.setTimeOfDay(this.timeOfDay);
-      
+
       // Update isNightTime flag based on timeOfDay
       this.isNightTime = this.timeOfDay >= 0.5;
     }
@@ -974,61 +974,63 @@ class World {
     }
 
     // Animate NPCs
-    this.npcs.forEach(npc => {
+    this.npcs.forEach((npc) => {
       if (npc.world === this.currentWorld) {
         // Simple idle animation
         npc.mesh.rotation.y += deltaTime * 0.2;
       }
     });
-    
+
     // Animate animals
-    this.animals.forEach(animal => {
+    this.animals.forEach((animal) => {
       if (animal.world === this.currentWorld) {
         // Update wandering behavior
         animal.wanderTime += deltaTime;
-        
+
         if (animal.wanderTime > 5) {
           // Generate new target position every 5 seconds
           const angle = Math.random() * Math.PI * 2;
           const distance = Math.random() * animal.wanderRadius;
-          
+
           const newX = animal.startPosition.x + Math.cos(angle) * distance;
           const newZ = animal.startPosition.z + Math.sin(angle) * distance;
           const newY = this.getHeightAt(newX, newZ);
-          
+
           animal.targetPosition.set(newX, newY, newZ);
           animal.wanderTime = 0;
         }
-        
+
         // Move toward target position
         const directionX = animal.targetPosition.x - animal.mesh.position.x;
         const directionZ = animal.targetPosition.z - animal.mesh.position.z;
-        const distance = Math.sqrt(directionX * directionX + directionZ * directionZ);
-        
+        const distance = Math.sqrt(
+          directionX * directionX + directionZ * directionZ
+        );
+
         if (distance > 0.1) {
           // Move towards target
           animal.mesh.position.x += directionX * animal.speed;
           animal.mesh.position.z += directionZ * animal.speed;
-          
+
           // Update Y position based on terrain
           animal.mesh.position.y = this.getHeightAt(
             animal.mesh.position.x,
             animal.mesh.position.z
           );
-          
+
           // Rotate to face movement direction
           const angle = Math.atan2(directionZ, directionX);
           animal.mesh.rotation.y = angle + Math.PI / 2;
         }
       }
     });
-    
+
     // Animate portals
-    this.portals.forEach(portal => {
+    this.portals.forEach((portal) => {
       if (portal.sourceWorld === this.currentWorld) {
         // Rotate portal ring
         portal.mesh.children[0].rotation.z += deltaTime * 0.5;
-        
+
         // Pulse portal light
         const time = Date.now() * 0.001;
         const pulseIntensity = 1.5 + Math.sin(time * 2) * 0.5;
@@ -1045,33 +1047,69 @@ class World {
         color: 0x8d5524,
         height: 1.8,
         dialogues: [
-          ["Hello there! Beautiful day, isn't it?", "Yes it is! Are you from around here?", "Born and raised. I know every tree in this forest."],
-          ["Careful in the dark woods at night.", "Why? Is it dangerous?", "Let's just say not all creatures sleep when the sun sets."],
-          ["Have you seen the portals? They say other worlds lie beyond.", "I've heard about them. Where are they?", "Look for the glowing circles. But be prepared before you step through!"]
-        ]
+          [
+            "Hello there! Beautiful day, isn't it?",
+            "Yes it is! Are you from around here?",
+            "Born and raised. I know every tree in this forest.",
+          ],
+          [
+            "Careful in the dark woods at night.",
+            "Why? Is it dangerous?",
+            "Let's just say not all creatures sleep when the sun sets.",
+          ],
+          [
+            "Have you seen the portals? They say other worlds lie beyond.",
+            "I've heard about them. Where are they?",
+            "Look for the glowing circles. But be prepared before you step through!",
+          ],
+        ],
       },
       {
         type: "trader",
         color: 0x3b5998,
         height: 1.9,
         dialogues: [
-          ["Greetings, traveler! Looking to trade?", "What do you have?", "Rare items from other worlds. Things you wouldn't believe!"],
-          ["The flowers you collect have special properties.", "Really? What kind?", "Some say they hold memories of past travelers. Quite valuable."],
-          ["I've traveled through all the portals.", "What's on the other side?", "Each leads to a different realm with its own wonders and dangers."]
-        ]
+          [
+            "Greetings, traveler! Looking to trade?",
+            "What do you have?",
+            "Rare items from other worlds. Things you wouldn't believe!",
+          ],
+          [
+            "The flowers you collect have special properties.",
+            "Really? What kind?",
+            "Some say they hold memories of past travelers. Quite valuable.",
+          ],
+          [
+            "I've traveled through all the portals.",
+            "What's on the other side?",
+            "Each leads to a different realm with its own wonders and dangers.",
+          ],
+        ],
       },
       {
         type: "elder",
         color: 0x800080,
         height: 1.7,
         dialogues: [
-          ["You have the look of someone searching for something.", "How did you know?", "The flowers call to certain people. You must be one of them."],
-          ["Day and night cycle just as memories do.", "What do you mean?", "As light fades, old memories surface. As light returns, we make new ones."],
-          ["The portals were created long ago by my ancestors.", "Why did they make them?", "To connect worlds that were once one. To remember what was lost."]
-        ]
-      }
+          [
+            "You have the look of someone searching for something.",
+            "How did you know?",
+            "The flowers call to certain people. You must be one of them.",
+          ],
+          [
+            "Day and night cycle just as memories do.",
+            "What do you mean?",
+            "As light fades, old memories surface. As light returns, we make new ones.",
+          ],
+          [
+            "The portals were created long ago by my ancestors.",
+            "Why did they make them?",
+            "To connect worlds that were once one. To remember what was lost.",
+          ],
+        ],
+      },
     ];
-    
+
     // Place NPCs around the world
     const npcLocations = [
       { x: 15, z: 15, type: "villager" },
@@ -1079,101 +1117,116 @@ class World {
       { x: 5, z: -15, type: "elder" },
       { x: -15, z: -20, type: "villager" },
       { x: 30, z: -5, type: "trader" },
-      { x: -10, z: 40, type: "elder" }
+      { x: -10, z: 40, type: "elder" },
     ];
-    
-    npcLocations.forEach(location => {
+
+    npcLocations.forEach((location) => {
       // Find the NPC type definition
-      const npcType = npcTypes.find(t => t.type === location.type);
+      const npcType = npcTypes.find((t) => t.type === location.type);
       if (!npcType) return;
-      
+
       // Create NPC group
       const npc = new THREE.Group();
-      
+
       // Body
-      const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.3, npcType.height * 0.6, 8);
+      const bodyGeometry = new THREE.CylinderGeometry(
+        0.5,
+        0.3,
+        npcType.height * 0.6,
+        8
+      );
       const bodyMaterial = new THREE.MeshStandardMaterial({
         color: npcType.color,
         roughness: 0.7,
-        metalness: 0.2
+        metalness: 0.2,
       });
       const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
       body.position.y = npcType.height * 0.3;
       npc.add(body);
-      
+
       // Head
       const headGeometry = new THREE.SphereGeometry(0.4, 16, 16);
       const headMaterial = new THREE.MeshStandardMaterial({
         color: 0xffcc99,
         roughness: 0.8,
-        metalness: 0.1
+        metalness: 0.1,
       });
       const head = new THREE.Mesh(headGeometry, headMaterial);
       head.position.y = npcType.height * 0.7;
       npc.add(head);
-      
+
       // Eyes
       const eyeGeometry = new THREE.SphereGeometry(0.08, 8, 8);
       const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      
+
       const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
       leftEye.position.set(0.15, npcType.height * 0.75, 0.3);
       npc.add(leftEye);
-      
+
       const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
       rightEye.position.set(-0.15, npcType.height * 0.75, 0.3);
       npc.add(rightEye);
-      
+
       // Arms
-      const armGeometry = new THREE.CylinderGeometry(0.1, 0.1, npcType.height * 0.4, 8);
+      const armGeometry = new THREE.CylinderGeometry(
+        0.1,
+        0.1,
+        npcType.height * 0.4,
+        8
+      );
       const armMaterial = new THREE.MeshStandardMaterial({
         color: npcType.color,
         roughness: 0.7,
-        metalness: 0.2
+        metalness: 0.2,
       });
-      
+
       const leftArm = new THREE.Mesh(armGeometry, armMaterial);
       leftArm.position.set(0.6, npcType.height * 0.45, 0);
       leftArm.rotation.z = Math.PI / 4;
       npc.add(leftArm);
-      
+
       const rightArm = new THREE.Mesh(armGeometry, armMaterial);
       rightArm.position.set(-0.6, npcType.height * 0.45, 0);
       rightArm.rotation.z = -Math.PI / 4;
       npc.add(rightArm);
-      
+
       // Legs
-      const legGeometry = new THREE.CylinderGeometry(0.15, 0.1, npcType.height * 0.4, 8);
+      const legGeometry = new THREE.CylinderGeometry(
+        0.15,
+        0.1,
+        npcType.height * 0.4,
+        8
+      );
       const legMaterial = new THREE.MeshStandardMaterial({
         color: 0x333333,
         roughness: 0.8,
-        metalness: 0.1
+        metalness: 0.1,
       });
-      
+
       const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
       leftLeg.position.set(0.2, npcType.height * 0.2 - 0.4, 0);
       npc.add(leftLeg);
-      
+
       const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
       rightLeg.position.set(-0.2, npcType.height * 0.2 - 0.4, 0);
       npc.add(rightLeg);
-      
+
       // Position NPC in the world
       const x = location.x;
       const z = location.z;
       const y = this.getHeightAt(x, z);
-      
+
       npc.position.set(x, y, z);
       npc.rotation.y = Math.random() * Math.PI * 2;
-      
+
       // Add shadow casting
-      npc.traverse(object => {
+      npc.traverse((object) => {
         if (object.isMesh) {
           object.castShadow = true;
           object.receiveShadow = true;
         }
       });
-      
+
       // Add NPC data
       this.npcs.push({
         mesh: npc,
@@ -1182,149 +1235,149 @@ class World {
         dialogues: npcType.dialogues,
         currentDialogue: null,
         interactionRadius: 5,
-        world: "main" // Default world
+        world: "main", // Default world
       });
-      
+
       this.scene.add(npc);
     });
   }
-  
+
   createHouses() {
     const houseLocations = [
       { x: 20, z: 20, rotation: Math.PI * 0.25, scale: 1.2 },
       { x: -25, z: 30, rotation: Math.PI * 1.5, scale: 1.0 },
       { x: 5, z: -20, rotation: Math.PI * 0.8, scale: 1.3 },
-      { x: -15, z: -25, rotation: Math.PI * 0.1, scale: 0.9 }
+      { x: -15, z: -25, rotation: Math.PI * 0.1, scale: 0.9 },
     ];
-    
-    houseLocations.forEach(location => {
+
+    houseLocations.forEach((location) => {
       // Create a simple house
       const house = new THREE.Group();
-      
+
       // House base/walls
       const baseGeometry = new THREE.BoxGeometry(5, 3, 4);
       const baseMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8B4513,
+        color: 0x8b4513,
         roughness: 1.0,
-        metalness: 0.0
+        metalness: 0.0,
       });
       const base = new THREE.Mesh(baseGeometry, baseMaterial);
       base.position.y = 1.5;
       house.add(base);
-      
+
       // Roof
       const roofGeometry = new THREE.ConeGeometry(4, 2, 4);
       const roofMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8B0000,
+        color: 0x8b0000,
         roughness: 0.8,
-        metalness: 0.1
+        metalness: 0.1,
       });
       const roof = new THREE.Mesh(roofGeometry, roofMaterial);
       roof.position.y = 4;
       roof.rotation.y = Math.PI / 4;
       house.add(roof);
-      
+
       // Door
       const doorGeometry = new THREE.PlaneGeometry(1, 2);
       const doorMaterial = new THREE.MeshStandardMaterial({
         color: 0x4d2600,
         roughness: 0.9,
         metalness: 0.1,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
       });
       const door = new THREE.Mesh(doorGeometry, doorMaterial);
       door.position.set(0, 1, 2.01);
       house.add(door);
-      
+
       // Windows
       const windowGeometry = new THREE.PlaneGeometry(1, 1);
       const windowMaterial = new THREE.MeshStandardMaterial({
         color: 0xadd8e6,
         roughness: 0.2,
         metalness: 0.8,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
       });
-      
+
       const frontWindow1 = new THREE.Mesh(windowGeometry, windowMaterial);
       frontWindow1.position.set(1.5, 1.5, 2.01);
       house.add(frontWindow1);
-      
+
       const frontWindow2 = new THREE.Mesh(windowGeometry, windowMaterial);
       frontWindow2.position.set(-1.5, 1.5, 2.01);
       house.add(frontWindow2);
-      
+
       const sideWindow1 = new THREE.Mesh(windowGeometry, windowMaterial);
       sideWindow1.position.set(2.51, 1.5, 1);
       sideWindow1.rotation.y = Math.PI / 2;
       house.add(sideWindow1);
-      
+
       const sideWindow2 = new THREE.Mesh(windowGeometry, windowMaterial);
       sideWindow2.position.set(-2.51, 1.5, 1);
       sideWindow2.rotation.y = Math.PI / 2;
       house.add(sideWindow2);
-      
+
       // Chimney
       const chimneyGeometry = new THREE.BoxGeometry(0.8, 2, 0.8);
       const chimneyMaterial = new THREE.MeshStandardMaterial({
         color: 0x696969,
         roughness: 1.0,
-        metalness: 0.1
+        metalness: 0.1,
       });
       const chimney = new THREE.Mesh(chimneyGeometry, chimneyMaterial);
       chimney.position.set(1.5, 4, -1);
       house.add(chimney);
-      
+
       // Position house in the world
       const x = location.x;
       const z = location.z;
       const y = this.getHeightAt(x, z);
-      
+
       house.position.set(x, y, z);
       house.rotation.y = location.rotation;
       house.scale.set(location.scale, location.scale, location.scale);
-      
+
       // Add shadow casting
-      house.traverse(object => {
+      house.traverse((object) => {
         if (object.isMesh) {
           object.castShadow = true;
           object.receiveShadow = true;
         }
       });
-      
+
       // Add house data
       this.houses.push({
         mesh: house,
         position: new THREE.Vector3(x, y, z),
-        world: "main" // Default world
+        world: "main", // Default world
       });
-      
+
       this.scene.add(house);
     });
   }
-  
+
   createAnimals() {
     // Define animal types
     const animalTypes = [
-      { 
-        type: "deer", 
-        color: 0x8B4513,
+      {
+        type: "deer",
+        color: 0x8b4513,
         speed: 0.02,
-        wanderRadius: 10
+        wanderRadius: 10,
       },
-      { 
-        type: "rabbit", 
-        color: 0xA9A9A9,
+      {
+        type: "rabbit",
+        color: 0xa9a9a9,
         speed: 0.04,
-        wanderRadius: 5
+        wanderRadius: 5,
       },
-      { 
-        type: "fox", 
-        color: 0xD2691E,
+      {
+        type: "fox",
+        color: 0xd2691e,
         speed: 0.03,
-        wanderRadius: 15
-      }
+        wanderRadius: 15,
+      },
     ];
-    
+
     // Animal spawn locations
     const animalLocations = [
       { x: 30, z: 30, type: "deer" },
@@ -1332,17 +1385,17 @@ class World {
       { x: 25, z: -20, type: "fox" },
       { x: -30, z: -25, type: "deer" },
       { x: 15, z: 40, type: "rabbit" },
-      { x: -35, z: 10, type: "fox" }
+      { x: -35, z: 10, type: "fox" },
     ];
-    
-    animalLocations.forEach(location => {
+
+    animalLocations.forEach((location) => {
       // Find animal type
-      const animalType = animalTypes.find(t => t.type === location.type);
+      const animalType = animalTypes.find((t) => t.type === location.type);
       if (!animalType) return;
-      
+
       // Create animal group
       const animal = new THREE.Group();
-      
+
       if (animalType.type === "deer") {
         // Body
         const bodyGeometry = new THREE.CylinderGeometry(0.6, 0.8, 1.5, 8);
@@ -1350,12 +1403,12 @@ class World {
         const bodyMaterial = new THREE.MeshStandardMaterial({
           color: animalType.color,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.position.y = 1.5;
         animal.add(body);
-        
+
         // Head
         const headGeometry = new THREE.ConeGeometry(0.4, 1, 8);
         const headMaterial = bodyMaterial.clone();
@@ -1363,133 +1416,131 @@ class World {
         head.position.set(1.2, 1.9, 0);
         head.rotation.z = -Math.PI / 4;
         animal.add(head);
-        
+
         // Antlers
         const antlerMaterial = new THREE.MeshStandardMaterial({
-          color: 0x8B7355,
+          color: 0x8b7355,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
-        
+
         const antler1Geometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 4);
         const antler1 = new THREE.Mesh(antler1Geometry, antlerMaterial);
         antler1.position.set(1.2, 2.2, 0.2);
         antler1.rotation.set(0, 0, Math.PI / 4);
         animal.add(antler1);
-        
+
         const antler2Geometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 4);
         const antler2 = new THREE.Mesh(antler2Geometry, antlerMaterial);
         antler2.position.set(1.2, 2.2, -0.2);
         antler2.rotation.set(0, 0, Math.PI / 4);
         animal.add(antler2);
-        
+
         // Legs
         const legGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 8);
         const legMaterial = bodyMaterial.clone();
-        
+
         const frontLeg1 = new THREE.Mesh(legGeometry, legMaterial);
         frontLeg1.position.set(0.7, 0.75, 0.4);
         animal.add(frontLeg1);
-        
+
         const frontLeg2 = new THREE.Mesh(legGeometry, legMaterial);
         frontLeg2.position.set(0.7, 0.75, -0.4);
         animal.add(frontLeg2);
-        
+
         const backLeg1 = new THREE.Mesh(legGeometry, legMaterial);
         backLeg1.position.set(-0.7, 0.75, 0.4);
         animal.add(backLeg1);
-        
+
         const backLeg2 = new THREE.Mesh(legGeometry, legMaterial);
         backLeg2.position.set(-0.7, 0.75, -0.4);
         animal.add(backLeg2);
-        
+
         // Tail
         const tailGeometry = new THREE.SphereGeometry(0.15, 8, 8);
         const tailMaterial = new THREE.MeshStandardMaterial({
-          color: 0xFFFFFF,
+          color: 0xffffff,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
         const tail = new THREE.Mesh(tailGeometry, tailMaterial);
         tail.position.set(-1.3, 1.5, 0);
         animal.add(tail);
-      } 
-      else if (animalType.type === "rabbit") {
+      } else if (animalType.type === "rabbit") {
         // Body
         const bodyGeometry = new THREE.SphereGeometry(0.5, 16, 16);
         const bodyMaterial = new THREE.MeshStandardMaterial({
           color: animalType.color,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.position.y = 0.5;
         body.scale.set(1, 0.8, 1);
         animal.add(body);
-        
+
         // Head
         const headGeometry = new THREE.SphereGeometry(0.3, 16, 16);
         const headMaterial = bodyMaterial.clone();
         const head = new THREE.Mesh(headGeometry, headMaterial);
         head.position.set(0.4, 0.7, 0);
         animal.add(head);
-        
+
         // Ears
         const earGeometry = new THREE.CylinderGeometry(0.05, 0.1, 0.4, 8);
         const earMaterial = bodyMaterial.clone();
-        
+
         const leftEar = new THREE.Mesh(earGeometry, earMaterial);
         leftEar.position.set(0.4, 1.0, 0.15);
         animal.add(leftEar);
-        
+
         const rightEar = new THREE.Mesh(earGeometry, earMaterial);
         rightEar.position.set(0.4, 1.0, -0.15);
         animal.add(rightEar);
-        
+
         // Legs
         const legGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8);
         const legMaterial = bodyMaterial.clone();
-        
+
         const frontLeg1 = new THREE.Mesh(legGeometry, legMaterial);
         frontLeg1.position.set(0.3, 0.15, 0.2);
         animal.add(frontLeg1);
-        
+
         const frontLeg2 = new THREE.Mesh(legGeometry, legMaterial);
         frontLeg2.position.set(0.3, 0.15, -0.2);
         animal.add(frontLeg2);
-        
+
         const backLeg1 = new THREE.Mesh(legGeometry, legMaterial);
         backLeg1.position.set(-0.3, 0.15, 0.2);
         animal.add(backLeg1);
-        
+
         const backLeg2 = new THREE.Mesh(legGeometry, legMaterial);
         backLeg2.position.set(-0.3, 0.15, -0.2);
         animal.add(backLeg2);
-        
+
         // Tail
         const tailGeometry = new THREE.SphereGeometry(0.1, 8, 8);
         const tailMaterial = new THREE.MeshStandardMaterial({
-          color: 0xFFFFFF,
+          color: 0xffffff,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
         const tail = new THREE.Mesh(tailGeometry, tailMaterial);
         tail.position.set(-0.6, 0.4, 0);
         animal.add(tail);
-      }
-      else if (animalType.type === "fox") {
+      } else if (animalType.type === "fox") {
         // Body
         const bodyGeometry = new THREE.CylinderGeometry(0.4, 0.6, 1.2, 8);
         bodyGeometry.rotateZ(Math.PI / 2);
         const bodyMaterial = new THREE.MeshStandardMaterial({
           color: animalType.color,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.position.y = 0.8;
         animal.add(body);
-        
+
         // Head
         const headGeometry = new THREE.ConeGeometry(0.3, 0.8, 8);
         const headMaterial = bodyMaterial.clone();
@@ -1497,69 +1548,69 @@ class World {
         head.position.set(0.8, 1.0, 0);
         head.rotation.z = -Math.PI / 4;
         animal.add(head);
-        
+
         // Ears
         const earGeometry = new THREE.ConeGeometry(0.1, 0.3, 8);
         const earMaterial = bodyMaterial.clone();
-        
+
         const leftEar = new THREE.Mesh(earGeometry, earMaterial);
         leftEar.position.set(0.8, 1.2, 0.15);
         animal.add(leftEar);
-        
+
         const rightEar = new THREE.Mesh(earGeometry, earMaterial);
         rightEar.position.set(0.8, 1.2, -0.15);
         animal.add(rightEar);
-        
+
         // Legs
         const legGeometry = new THREE.CylinderGeometry(0.07, 0.07, 0.8, 8);
         const legMaterial = bodyMaterial.clone();
-        
+
         const frontLeg1 = new THREE.Mesh(legGeometry, legMaterial);
         frontLeg1.position.set(0.5, 0.4, 0.3);
         animal.add(frontLeg1);
-        
+
         const frontLeg2 = new THREE.Mesh(legGeometry, legMaterial);
         frontLeg2.position.set(0.5, 0.4, -0.3);
         animal.add(frontLeg2);
-        
+
         const backLeg1 = new THREE.Mesh(legGeometry, legMaterial);
         backLeg1.position.set(-0.5, 0.4, 0.3);
         animal.add(backLeg1);
-        
+
         const backLeg2 = new THREE.Mesh(legGeometry, legMaterial);
         backLeg2.position.set(-0.5, 0.4, -0.3);
         animal.add(backLeg2);
-        
+
         // Tail
         const tailGeometry = new THREE.CylinderGeometry(0.05, 0.15, 0.8, 8);
         tailGeometry.translate(0, -0.4, 0);
         const tailMaterial = new THREE.MeshStandardMaterial({
           color: animalType.color,
           roughness: 0.9,
-          metalness: 0.1
+          metalness: 0.1,
         });
         const tail = new THREE.Mesh(tailGeometry, tailMaterial);
         tail.position.set(-0.8, 0.9, 0);
         tail.rotation.z = Math.PI / 4;
         animal.add(tail);
       }
-      
+
       // Position animal in the world
       const x = location.x;
       const z = location.z;
       const y = this.getHeightAt(x, z);
-      
+
       animal.position.set(x, y, z);
       animal.rotation.y = Math.random() * Math.PI * 2;
-      
+
       // Add shadow casting
-      animal.traverse(object => {
+      animal.traverse((object) => {
         if (object.isMesh) {
           object.castShadow = true;
           object.receiveShadow = true;
         }
       });
-      
+
       // Add animal data for animation
       this.animals.push({
         mesh: animal,
@@ -1570,40 +1621,46 @@ class World {
         speed: animalType.speed,
         wanderRadius: animalType.wanderRadius,
         wanderTime: 0,
-        world: "main" // Default world
+        world: "main", // Default world
       });
-      
+
       this.scene.add(animal);
     });
   }
-  
+
   createPortals() {
     // Define portals to different worlds
     const portalLocations = [
-      { 
-        x: 50, z: 0, 
-        targetWorld: "desert", 
+      {
+        x: 50,
+        z: 0,
+        targetWorld: "desert",
         color: 0xffcc00,
-        description: "A shimmering golden portal that radiates heat. Desert world awaits." 
+        description:
+          "A shimmering golden portal that radiates heat. Desert world awaits.",
       },
-      { 
-        x: 0, z: 50, 
-        targetWorld: "snow", 
+      {
+        x: 0,
+        z: 50,
+        targetWorld: "snow",
         color: 0x00ccff,
-        description: "A cool blue portal with snowflakes hovering around it. Winter wonderland." 
+        description:
+          "A cool blue portal with snowflakes hovering around it. Winter wonderland.",
       },
-      { 
-        x: -50, z: 0, 
-        targetWorld: "lava", 
+      {
+        x: -50,
+        z: 0,
+        targetWorld: "lava",
         color: 0xff3300,
-        description: "A blazing red portal that pulses with heat. Volcanic landscape." 
-      }
+        description:
+          "A blazing red portal that pulses with heat. Volcanic landscape.",
+      },
     ];
-    
-    portalLocations.forEach(location => {
+
+    portalLocations.forEach((location) => {
       // Create portal
       const portalGroup = new THREE.Group();
-      
+
       // Outer ring
       const ringGeometry = new THREE.TorusGeometry(2, 0.4, 16, 32);
       const ringMaterial = new THREE.MeshStandardMaterial({
@@ -1611,28 +1668,28 @@ class World {
         emissive: location.color,
         emissiveIntensity: 0.5,
         roughness: 0.3,
-        metalness: 0.8
+        metalness: 0.8,
       });
       const ring = new THREE.Mesh(ringGeometry, ringMaterial);
       portalGroup.add(ring);
-      
+
       // Portal center
       const centerGeometry = new THREE.CircleGeometry(1.8, 32);
       const centerMaterial = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         transparent: true,
         opacity: 0.7,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
       });
       const center = new THREE.Mesh(centerGeometry, centerMaterial);
       center.position.z = 0.01;
       portalGroup.add(center);
-      
+
       // Particle effects (simple mesh points)
       const particleCount = 50;
       const particleGeometry = new THREE.BufferGeometry();
       const particlePositions = [];
-      
+
       for (let i = 0; i < particleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
         const radius = Math.random() * 1.8;
@@ -1642,35 +1699,35 @@ class World {
           (Math.random() - 0.5) * 0.5 // z
         );
       }
-      
+
       particleGeometry.setAttribute(
-        'position',
+        "position",
         new THREE.Float32BufferAttribute(particlePositions, 3)
       );
-      
+
       const particleMaterial = new THREE.PointsMaterial({
         color: location.color,
         size: 0.1,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.8,
       });
-      
+
       const particles = new THREE.Points(particleGeometry, particleMaterial);
       portalGroup.add(particles);
-      
+
       // Add portal light
       const portalLight = new THREE.PointLight(location.color, 2, 10);
       portalLight.position.set(0, 0, 0);
       portalGroup.add(portalLight);
-      
+
       // Position portal in the world
       const x = location.x;
       const z = location.z;
       const y = this.getHeightAt(x, z) + 3; // Elevate portal
-      
+
       portalGroup.position.set(x, y, z);
       portalGroup.rotation.x = Math.PI / 2; // Make portal vertical
-      
+
       // Add portal data
       this.portals.push({
         mesh: portalGroup,
@@ -1679,18 +1736,18 @@ class World {
         sourceWorld: "main",
         color: location.color,
         description: location.description,
-        interactionRadius: 3.5
+        interactionRadius: 3.5,
       });
-      
+
       this.scene.add(portalGroup);
     });
   }
-  
+
   // NPC interaction
   getNPCAtPosition(position, radius) {
     for (const npc of this.npcs) {
       if (npc.world !== this.currentWorld) continue;
-      
+
       const distance = position.distanceTo(npc.position);
       if (distance <= radius + npc.interactionRadius) {
         return npc;
@@ -1698,12 +1755,12 @@ class World {
     }
     return null;
   }
-  
+
   // Portal interaction
   getPortalAtPosition(position, radius) {
     for (const portal of this.portals) {
       if (portal.sourceWorld !== this.currentWorld) continue;
-      
+
       const distance = position.distanceTo(portal.position);
       if (distance <= radius + portal.interactionRadius) {
         return portal;
@@ -1711,42 +1768,42 @@ class World {
     }
     return null;
   }
-  
+
   // Transport player to another world
   transportToWorld(worldName) {
     // Hide current world objects
-    this.npcs.forEach(npc => {
+    this.npcs.forEach((npc) => {
       if (npc.world === this.currentWorld) {
         npc.mesh.visible = false;
       } else if (npc.world === worldName) {
         npc.mesh.visible = true;
       }
     });
-    
-    this.animals.forEach(animal => {
+
+    this.animals.forEach((animal) => {
       if (animal.world === this.currentWorld) {
         animal.mesh.visible = false;
       } else if (animal.world === worldName) {
         animal.mesh.visible = true;
       }
     });
-    
-    this.houses.forEach(house => {
+
+    this.houses.forEach((house) => {
       if (house.world === this.currentWorld) {
         house.mesh.visible = false;
       } else if (house.world === worldName) {
         house.mesh.visible = true;
       }
     });
-    
-    this.portals.forEach(portal => {
+
+    this.portals.forEach((portal) => {
       if (portal.sourceWorld === this.currentWorld) {
         portal.mesh.visible = false;
       } else if (portal.sourceWorld === worldName) {
         portal.mesh.visible = true;
       }
     });
-    
+
     // Update current world
     this.currentWorld = worldName;
   }
